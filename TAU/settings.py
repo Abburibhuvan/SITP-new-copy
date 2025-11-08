@@ -160,41 +160,47 @@ FILE_UPLOAD_DIRECTORY_PERMISSIONS = 0o755
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Security Settings - All disabled for local development
-SECURE_SSL_REDIRECT = False
-SECURE_PROXY_SSL_HEADER = None
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
-SECURE_HSTS_SECONDS = 0
-SECURE_HSTS_INCLUDE_SUBDOMAINS = False
-SECURE_HSTS_PRELOAD = False
-USE_X_FORWARDED_HOST = False
-USE_X_FORWARDED_PORT = False
+# Security Settings
+# Enable security features in production
+IS_PRODUCTION = os.getenv('PRODUCTION', 'False') == 'True'
+
+SECURE_SSL_REDIRECT = IS_PRODUCTION  # Redirect HTTP to HTTPS in production
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https') if IS_PRODUCTION else None
+SECURE_HSTS_SECONDS = 31536000 if IS_PRODUCTION else 0  # 1 year
+SECURE_HSTS_INCLUDE_SUBDOMAINS = IS_PRODUCTION
+SECURE_HSTS_PRELOAD = IS_PRODUCTION
+USE_X_FORWARDED_HOST = True  # Trust X-Forwarded-Host header from proxy
+USE_X_FORWARDED_PORT = True  # Trust X-Forwarded-Port header from proxy
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
-SECURE_REDIRECT_EXEMPT = ['.*']
-SECURE_SSL_HOST = None
+SECURE_REDIRECT_EXEMPT = []
 
 # Additional Security Headers
 SECURE_REFERRER_POLICY = 'same-origin'
 X_FRAME_OPTIONS = 'DENY'
 
 # CSRF Settings
-CSRF_COOKIE_SECURE = False  # Allow non-HTTPS in development
-CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript access in development
-CSRF_USE_SESSIONS = False  # Store CSRF token in cookie for development
-CSRF_COOKIE_SAMESITE = 'Lax'  # Less restrictive for development
+# Determine if we're in production (HTTPS) or development
+IS_PRODUCTION = os.getenv('PRODUCTION', 'False') == 'True'
+
+CSRF_COOKIE_SECURE = IS_PRODUCTION  # Only send cookie over HTTPS in production
+CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript to read the token
+CSRF_USE_SESSIONS = False  # Store CSRF token in cookie
+CSRF_COOKIE_SAMESITE = 'Lax'
 CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
-# Get CSRF trusted origins from environment or use defaults
-csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:7000,http://localhost:7000')
+
+# CSRF Trusted Origins - Add your Zeabur domain
+csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', 'https://sitp-app.zeabur.app,http://127.0.0.1:7000,http://localhost:7000')
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(',') if origin.strip()]
+
 CSRF_COOKIE_NAME = 'csrftoken'
 CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
-CSRF_COOKIE_DOMAIN = None  # Allow all domains in development
-CSRF_COOKIE_PATH = '/'  # Set cookie path to root
+CSRF_COOKIE_DOMAIN = None
+CSRF_COOKIE_PATH = '/'
 CSRF_COOKIE_AGE = None  # Cookie expires when browser closes
 
 # Session Settings
+SESSION_COOKIE_SECURE = IS_PRODUCTION  # Only send session cookie over HTTPS in production
 SESSION_COOKIE_HTTPONLY = True
 SESSION_COOKIE_SAMESITE = 'Lax'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'

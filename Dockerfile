@@ -17,10 +17,10 @@ RUN pip install --no-cache-dir -r requirements.txt gunicorn
 # Copy project files
 COPY . .
 
-# Collect static files
-RUN python manage.py collectstatic --noinput || true
+# Make start script executable
+RUN chmod +x start.sh
 
 EXPOSE 8080
 
-# Run gunicorn
-CMD ["gunicorn", "TAU.wsgi:application", "--bind", "0.0.0.0:8080", "--log-file", "-", "--access-logfile", "-", "--workers", "2"]
+# Run startup script
+CMD ["./start.sh"]

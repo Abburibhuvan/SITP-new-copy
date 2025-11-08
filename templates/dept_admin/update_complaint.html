@@ -1,0 +1,133 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Update Ticket - {{ ticket.ticket_id }}{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8">
+        <h1 class="text-3xl font-bold">Update Ticket</h1>
+        <a href="{% url 'dept_admin:dashboard' %}" class="text-blue-600 hover:text-blue-800">
+            ← Back to Dashboard
+        </a>
+    </div>
+
+    {% if messages %}
+    <div class="mb-8">
+        {% for message in messages %}
+            <div class="p-4 rounded-lg {% if message.tags == 'success' %}bg-green-100 text-green-700{% elif message.tags == 'error' %}bg-red-100 text-red-700{% else %}bg-blue-100 text-blue-700{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <div class="p-6">
+            <div class="mb-8">
+                <h2 class="text-xl font-semibold mb-4">Ticket Details</h2>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <p class="text-sm text-gray-600">Ticket ID</p>
+                        <p class="font-medium">{{ ticket.ticket_id }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Created</p>
+                        <p class="font-medium">{{ ticket.created_at|date:"M d, Y H:i" }}</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-600">Student</p>
+                        <p class="font-medium">{{ ticket.student.get_full_name|default:ticket.student.username }}</p>
+                    </div>
+                    {% if is_general_dept %}
+                    <div>
+                        <p class="text-sm text-gray-600">Original Department</p>
+                        <p class="font-medium">{{ ticket.original_department.name }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <form method="post" class="space-y-6">
+                {% csrf_token %}
+                
+                <div>
+                    <label for="id_subject" class="block text-sm font-medium text-gray-700">Subject</label>
+                    <p class="mt-1 text-gray-900">{{ ticket.subject }}</p>
+                </div>
+
+                <div>
+                    <label for="id_description" class="block text-sm font-medium text-gray-700">Description</label>
+                    <p class="mt-1 text-gray-900 whitespace-pre-wrap">{{ ticket.description }}</p>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Attachment</label>
+                    {% if ticket.attachment %}
+                        <div class="mt-1 p-3 bg-gray-50 border border-gray-200 rounded-lg">
+                            <div class="flex items-center">
+                                <i class="fas fa-paperclip text-gray-400 mr-2"></i>
+                                <span class="text-sm text-gray-600 mr-3">{{ ticket.attachment.name|slice:"19:" }}</span>
+                                <a href="{{ ticket.attachment.url }}" 
+                                   class="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                                   target="_blank">
+                                    <i class="fas fa-download mr-1"></i>Download
+                                </a>
+                            </div>
+                        </div>
+                    {% else %}
+                        <p class="mt-1 text-gray-500 text-sm">No attachment</p>
+                    {% endif %}
+                </div>
+
+                {% if not is_general_dept %}
+                <div>
+                    <label for="id_priority" class="block text-sm font-medium text-gray-700">Priority</label>
+                    {{ form.priority }}
+                    {% if form.priority.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.priority.errors.0 }}</p>
+                    {% endif %}
+                </div>
+                {% endif %}
+
+                <div>
+                    <label for="id_status" class="block text-sm font-medium text-gray-700">Status</label>
+                    {{ form.status }}
+                    {% if form.status.errors %}
+                    <p class="mt-2 text-sm text-red-600">{{ form.status.errors.0 }}</p>
+                    {% endif %}
+                </div>
+
+                <div class="flex justify-end space-x-4">
+                    <a href="{% url 'dept_admin:dashboard' %}" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50">
+                        Cancel
+                    </a>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                        Update Ticket
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+select, textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #D1D5DB;
+    border-radius: 0.375rem;
+    margin-top: 0.25rem;
+}
+
+textarea {
+    min-height: 100px;
+}
+
+select:focus, textarea:focus {
+    outline: none;
+    border-color: #2563EB;
+    ring: 2px solid #2563EB;
+}
+</style>
+{% endblock %} 

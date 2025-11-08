@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ department.name }} Admin Dashboard{% endblock %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/dept_admin_dashboard.css' %}">
+<!-- Add Font Awesome for icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+<div class="dashboard-container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <img src="{% static 'css/image.png' %}" alt="Department Logo" class="dept-logo">
+            <h3>{{ department.name }}</h3>
+            <p class="dept-subtitle">Department Admin Portal</p>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="active"><i class="fas fa-home"></i> Dashboard</a>
+            <a href="#tickets"><i class="fas fa-ticket-alt"></i> Tickets</a>
+            <a href="{% url 'dept_admin:sla_dashboard' %}"><i class="fas fa-chart-line"></i> SLA & Escalation</a>
+            <form method="POST" action="{% url 'dept_admin:logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="nav-button"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </form>
+        </nav>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        {% include "dept_admin/dashboard_content.html" %}
+    </div>
+</div>
+{% endblock %} 

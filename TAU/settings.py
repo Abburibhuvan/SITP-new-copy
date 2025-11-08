@@ -21,12 +21,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-=7!*$_$=7!*$_$=7!*$_$=7!*$_$=7!*$_$'
+SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-=7!*$_$=7!*$_$=7!*$_$=7!*$_$=7!*$_')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,*.zeabur.app').split(',')
 
 
 # Application definition
@@ -126,10 +126,15 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-    os.path.join(BASE_DIR.parent, 'static'),
-]
+# Only include existing directories in STATICFILES_DIRS
+STATICFILES_DIRS = []
+static_dir = os.path.join(BASE_DIR, 'static')
+if os.path.exists(static_dir):
+    STATICFILES_DIRS.append(static_dir)
+parent_static = os.path.join(BASE_DIR.parent, 'static')
+if os.path.exists(parent_static) and parent_static != static_dir:
+    STATICFILES_DIRS.append(parent_static)
+
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 # Media files (Uploaded files)
@@ -168,7 +173,6 @@ SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_REDIRECT_EXEMPT = ['.*']
 SECURE_SSL_HOST = None
-SESSION_COOKIE_SECURE = False
 
 # Additional Security Headers
 SECURE_REFERRER_POLICY = 'same-origin'
@@ -180,7 +184,9 @@ CSRF_COOKIE_HTTPONLY = False  # Allow JavaScript access in development
 CSRF_USE_SESSIONS = False  # Store CSRF token in cookie for development
 CSRF_COOKIE_SAMESITE = 'Lax'  # Less restrictive for development
 CSRF_FAILURE_VIEW = 'django.views.csrf.csrf_failure'
-CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:7000', 'http://localhost:7000']
+# Get CSRF trusted origins from environment or use defaults
+csrf_origins = os.getenv('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1:7000,http://localhost:7000')
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(',') if origin.strip()]
 CSRF_COOKIE_NAME = 'csrftoken'
 CSRF_HEADER_NAME = 'HTTP_X_CSRFTOKEN'
 CSRF_COOKIE_DOMAIN = None  # Allow all domains in development

@@ -26,7 +26,8 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-=7!*$_$=7!*$_$=7!*$_$=7!*$
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1,*.zeabur.app').split(',')
+# Allow all hosts for Zeabur deployment (you can restrict this later with your specific domain)
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
